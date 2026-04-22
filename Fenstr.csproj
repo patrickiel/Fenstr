@@ -1,0 +1,127 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <OutputType>WinExe</OutputType>
+    <TargetFramework>net9.0-windows10.0.19041.0</TargetFramework>
+    <TargetPlatformMinVersion>10.0.17763.0</TargetPlatformMinVersion>
+    <RootNamespace>Fenstr</RootNamespace>
+    <AssemblyName>Fenstr</AssemblyName>
+    <ApplicationManifest Condition="'$(Configuration)'=='Debug'">app.Debug.manifest</ApplicationManifest>
+    <ApplicationManifest Condition="'$(Configuration)'!='Debug'">app.manifest</ApplicationManifest>
+    <ApplicationIcon>Assets\tray-dark.ico</ApplicationIcon>
+    <Platforms>x86;x64;ARM64</Platforms>
+    <RuntimeIdentifiers>win-x86;win-x64;win-arm64</RuntimeIdentifiers>
+    <PublishProfile>win-$(Platform).pubxml</PublishProfile>
+    <UseWinUI>true</UseWinUI>
+    <WinUISDKReferences>false</WinUISDKReferences>
+    <EnableMsixTooling>true</EnableMsixTooling>
+    <Nullable>enable</Nullable>
+    <LangVersion>latest</LangVersion>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+    <Version>0.1.0</Version>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <Content Include="Assets\SplashScreen.scale-200.png" />
+    <Content Include="Assets\LockScreenLogo.scale-200.png" />
+    <Content Include="Assets\Square150x150Logo.scale-200.png" />
+    <Content Include="Assets\Square44x44Logo.scale-200.png" />
+    <Content Include="Assets\Square44x44Logo.targetsize-24_altform-unplated.png" />
+    <Content Include="Assets\StoreLogo.png" />
+    <Content Include="Assets\Wide310x150Logo.scale-200.png" />
+    <Content Include="Assets\tray-dark.ico" CopyToOutputDirectory="PreserveNewest" />
+    <Content Include="Assets\tray-light.ico" CopyToOutputDirectory="PreserveNewest" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Manifest Include="$(ApplicationManifest)" />
+  </ItemGroup>
+
+  <ItemGroup Condition="'$(DisableMsixProjectCapabilityAddedByProject)'!='true' and '$(EnableMsixTooling)'=='true'">
+    <ProjectCapability Include="Msix" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="H.NotifyIcon.WinUI" Version="2.3.0" />
+    <PackageReference Include="Microsoft.Windows.SDK.BuildTools" Version="10.0.28000.1721" />
+    <PackageReference Include="Microsoft.WindowsAppSDK" Version="1.8.260416003" />
+  </ItemGroup>
+
+  <PropertyGroup Condition="'$(DisableHasPackageAndPublishMenuAddedByProject)'!='true' and '$(EnableMsixTooling)'=='true'">
+    <HasPackageAndPublishMenu>true</HasPackageAndPublishMenu>
+  </PropertyGroup>
+
+  <PropertyGroup>
+    <PublishReadyToRun Condition="'$(Configuration)' == 'Debug'">False</PublishReadyToRun>
+    <PublishReadyToRun Condition="'$(Configuration)' != 'Debug'">True</PublishReadyToRun>
+  </PropertyGroup>
+
+  <!--
+    Self-contained WindowsAppSDK: bundles the runtime next to the exe instead of relying on
+    a per-user MSIX package registration. Required when running with uiAccess="true",
+    because the elevated token cannot resolve the user's WindowsAppRuntime package and the
+    auto-initializer throws REGDB_E_CLASSNOTREG on startup.
+
+    Self-contained also means the Deployment Manager auto-initializer must be off. It tries
+    to activate Microsoft.Windows.ApplicationModel.WindowsAppRuntime.DeploymentInitializeOptions,
+    which only resolves when a Microsoft.WindowsAppRuntime framework package is registered on
+    the machine. In the Store MSIX it is not, and the unhandled COMException terminates the
+    process at startup with "The request is not supported." (broke the v0.1.1 Store release).
+  -->
+  <PropertyGroup>
+    <WindowsAppSDKSelfContained>true</WindowsAppSDKSelfContained>
+    <SelfContained>true</SelfContained>
+    <WindowsAppSdkDeploymentManagerInitialize>false</WindowsAppSdkDeploymentManagerInitialize>
+  </PropertyGroup>
+
+  <!--
+    uiAccess="true" in app.manifest only activates when the exe is (1) signed by a cert
+    chaining to a trusted root AND (2) launched from a protected directory (Program Files
+    or System32). Without both, Windows silently starts the process at normal integrity and
+    RMB/Shift hooks remain blocked over elevated targets (Thunderbird, Task Manager).
+
+    One-time dev cert setup (run PowerShell as Administrator):
+
+      $cert = New-SelfSignedCertificate -Subject "CN=Fenstr Dev" -Type CodeSigningCert `
+        -CertStoreLocation Cert:\CurrentUser\My -KeyUsage DigitalSignature -KeyExportPolicy Exportable
+      $pwd = ConvertTo-SecureString -String "temp" -Force -AsPlainText
+      Export-PfxCertificate -Cert $cert -FilePath fenstr-dev.pfx -Password $pwd
+      Import-PfxCertificate -FilePath fenstr-dev.pfx -CertStoreLocation Cert:\LocalMachine\Root -Password $pwd
+      Import-PfxCertificate -FilePath fenstr-dev.pfx -CertStoreLocation Cert:\LocalMachine\TrustedPublisher -Password $pwd
+
+    Build + deploy:
+      dotnet build -c Release -p:DeployFenstr=true     (VS / terminal must be elevated to write Program Files)
+
+    Then launch from C:\Program Files\Fenstr\Fenstr.exe.
+  -->
+  <PropertyGroup>
+    <FenstrSignPfx Condition="'$(FenstrSignPfx)'==''">$(ProjectDir)fenstr-dev.pfx</FenstrSignPfx>
+    <FenstrSignPassword Condition="'$(FenstrSignPassword)'==''">temp</FenstrSignPassword>
+    <FenstrDeployDir Condition="'$(FenstrDeployDir)'==''">C:\Program Files\Fenstr</FenstrDeployDir>
+  </PropertyGroup>
+
+  <Target Name="SignOutput" AfterTargets="Build"
+          Condition="'$(Configuration)'=='Release' And Exists('$(FenstrSignPfx)')">
+    <!--
+      We sign the native apphost .exe, which carries the embedded manifest. For SDK-style
+      executable projects $(TargetPath) points to the managed .dll, so we build the exe
+      path manually. signtool.exe ships with the Windows SDK; we pick the newest installed
+      version under the SDK bin dir.
+    -->
+    <PropertyGroup>
+      <_FenstrAppHost>$(TargetDir)$(AssemblyName).exe</_FenstrAppHost>
+      <_FenstrSdkBin>C:\Program Files (x86)\Windows Kits\10\bin</_FenstrSdkBin>
+      <_FenstrSignTool Condition="Exists('$(_FenstrSdkBin)\10.0.26100.0\x64\signtool.exe')">$(_FenstrSdkBin)\10.0.26100.0\x64\signtool.exe</_FenstrSignTool>
+      <_FenstrSignTool Condition="'$(_FenstrSignTool)'=='' And Exists('$(_FenstrSdkBin)\10.0.22621.0\x64\signtool.exe')">$(_FenstrSdkBin)\10.0.22621.0\x64\signtool.exe</_FenstrSignTool>
+      <_FenstrSignTool Condition="'$(_FenstrSignTool)'=='' And Exists('$(_FenstrSdkBin)\10.0.19041.0\x64\signtool.exe')">$(_FenstrSdkBin)\10.0.19041.0\x64\signtool.exe</_FenstrSignTool>
+    </PropertyGroup>
+    <Error Text="Could not locate signtool.exe under $(_FenstrSdkBin). Install the Windows SDK or override _FenstrSignTool."
+           Condition="'$(_FenstrSignTool)'==''" />
+    <Exec Command="&quot;$(_FenstrSignTool)&quot; sign /fd SHA256 /f &quot;$(FenstrSignPfx)&quot; /p $(FenstrSignPassword) &quot;$(_FenstrAppHost)&quot;" />
+  </Target>
+
+  <Target Name="DeployForUiAccess" AfterTargets="SignOutput"
+          Condition="'$(DeployFenstr)'=='true'">
+    <Exec Command="xcopy /Y /E /I &quot;$(TargetDir)*&quot; &quot;$(FenstrDeployDir)&quot;" />
+  </Target>
+</Project>

@@ -1,0 +1,10 @@
+{
+  "profiles": {
+    "Fenstr (Package)": {
+      "commandName": "MsixPackage"
+    },
+    "Fenstr (Unpackaged)": {
+      "commandName": "Project"
+    }
+  }
+}
