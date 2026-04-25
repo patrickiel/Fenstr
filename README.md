@@ -19,20 +19,15 @@ Fenstr automatically disables Windows 11's built-in Snap Layouts to avoid confli
 
 ## Install
 
-### Microsoft Store (recommended)
+### Installer (recommended)
 
-<a href="https://apps.microsoft.com/detail/9MVWP33Z2Z29">
-  <img src="https://get.microsoft.com/images/en-us%20dark.svg" alt="Get it from Microsoft" width="240"/>
-</a>
+Download `Fenstr-vX.Y.Z-setup.exe` from the [Releases](https://github.com/patrickiel/Fenstr/releases) page and run it. The installer places Fenstr in `Program Files\Fenstr`, which is required for hooking elevated windows (Task Manager, etc.). An optional "Run at login" checkbox registers Fenstr as a startup app.
 
-Auto-updates through the Store. All runtime dependencies are bundled; nothing else to install.
+### Portable
 
-### Portable release
+Download the `.zip` from the [Releases](https://github.com/patrickiel/Fenstr/releases) page, extract, and run `Fenstr.exe`. Note: hooks over elevated windows won't work from arbitrary directories (see [Working with elevated windows](#working-with-elevated-windows-thunderbird-task-manager-) below).
 
-1. Download the latest release from the [Releases](https://github.com/patrickiel/Fenstr/releases) page
-2. Extract the archive and run `Fenstr.exe`
-
-The portable zip is self-contained; no separate .NET or Windows App SDK install needed.
+Both downloads are self-contained; no separate .NET or Windows App SDK install needed.
 
 ### Build from source
 
