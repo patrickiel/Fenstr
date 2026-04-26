@@ -32,8 +32,13 @@
                 <Border Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"
                         BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
                         BorderThickness="1" CornerRadius="8" Padding="16,8,16,8">
-                    <ToggleSwitch x:Name="StartupToggle" Header="Run at login"
-                                  Toggled="StartupToggle_Toggled" />
+                    <StackPanel Spacing="4">
+                        <ToggleSwitch x:Name="StartupToggle" Header="Run at login"
+                                      Toggled="StartupToggle_Toggled" />
+                        <ToggleSwitch x:Name="MaximizeFullScreenToggle"
+                                      Header="Maximize when snapped region fills the screen"
+                                      Toggled="MaximizeFullScreenToggle_Toggled" />
+                    </StackPanel>
                 </Border>
 
                 <!-- Drag to maximize -->

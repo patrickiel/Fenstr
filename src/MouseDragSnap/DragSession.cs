@@ -76,7 +76,7 @@ internal sealed class DragSession(
             if (ActiveRegion.Index == MaximizeRegionIndex)
                 ShowWindow(DraggedHwnd, SW_MAXIMIZE);
             else
-                WindowSnapper.Snap(DraggedHwnd, ActiveRegion.Rect);
+                WindowSnapper.Snap(DraggedHwnd, ActiveRegion.Rect, config.MaximizeWhenFullScreen);
         }
         HideActiveOverlay();
         HideAllGridPreviews();

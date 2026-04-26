@@ -3,15 +3,18 @@ using static Fenstr.CommonInterop;
 
 namespace Fenstr;
 
-/// <summary>
-/// Positions a window at a target rect, compensating for the DWM invisible
-/// border so the visible frame lines up with the region edges.
-/// </summary>
 internal static class WindowSnapper
 {
-    public static void Snap(nint hwnd, RECT target)
+    public static void Snap(nint hwnd, RECT target, bool maximizeWhenFullScreen = false)
     {
         if (hwnd == 0) return;
+
+        if (maximizeWhenFullScreen && FillsMonitorWorkArea(target))
+        {
+            if (!IsZoomed(hwnd))
+                ShowWindow(hwnd, SW_MAXIMIZE);
+            return;
+        }
 
         if (IsZoomed(hwnd))
             ShowWindow(hwnd, SW_RESTORE);
@@ -37,5 +40,20 @@ internal static class WindowSnapper
             target.Width + dL + dR,
             target.Height + dT + dB,
             SWP_NOACTIVATE | SWP_NOZORDER);
+    }
+
+    private static bool FillsMonitorWorkArea(RECT target)
+    {
+        var hMon = MonitorFromRect(ref target, MONITOR_DEFAULTTONEAREST);
+        if (hMon == 0) return false;
+        var info = new MONITORINFOEX
+        {
+            cbSize = Marshal.SizeOf<MONITORINFOEX>(),
+            szDevice = string.Empty,
+        };
+        if (!GetMonitorInfo(hMon, ref info)) return false;
+        var wa = info.rcWork;
+        return target.Left <= wa.Left && target.Top <= wa.Top
+            && target.Right >= wa.Right && target.Bottom >= wa.Bottom;
     }
 }

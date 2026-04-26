@@ -57,6 +57,7 @@ public sealed partial class MainWindow : Window
         _loading = true;
         try
         {
+            MaximizeFullScreenToggle.IsOn = cfg.MaximizeWhenFullScreen;
             MaximizeDragToggle.IsOn = cfg.MaximizeDragEnabled;
             MaximizeWidthSlider.Value = cfg.MaximizeDragWidthPercent;
             MaximizeWidthLabel.Text = cfg.MaximizeDragWidthPercent + "%";
@@ -77,6 +78,19 @@ public sealed partial class MainWindow : Window
         {
             _loading = false;
         }
+    }
+
+    private void MaximizeFullScreenToggle_Toggled(object sender, RoutedEventArgs e)
+    {
+        if (_loading) return;
+        var cfg = ((App)Application.Current).Cfg;
+        if (cfg == null) return;
+
+        var updated = cfg with { MaximizeWhenFullScreen = MaximizeFullScreenToggle.IsOn };
+        updated.Save();
+
+        ((App)Application.Current).Cfg = updated;
+        DragTracker.UpdateConfig(updated);
     }
 
     private void MaximizeDragToggle_Toggled(object sender, RoutedEventArgs e)

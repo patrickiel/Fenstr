@@ -116,6 +116,9 @@ internal static partial class CommonInterop
     public const uint MONITOR_DEFAULTTONEAREST = 2;
 
     [LibraryImport("user32.dll")]
+    public static partial nint MonitorFromRect(ref RECT lprc, uint dwFlags);
+
+    [LibraryImport("user32.dll")]
     [return: MarshalAs(UnmanagedType.Bool)]
     public static partial bool ShowWindow(nint hWnd, int nCmdShow);
 

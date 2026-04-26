@@ -19,7 +19,8 @@ internal record Config(
     HotkeyBinding? PlacementHotkey = null,
     bool PlacementHotkeyEnabled = true,
     bool MaximizeDragEnabled = true,
-    int MaximizeDragWidthPercent = 50)
+    int MaximizeDragWidthPercent = 50,
+    bool MaximizeWhenFullScreen = true)
 {
     public const int DefaultDivisions = 2;
 

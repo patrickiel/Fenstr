@@ -189,7 +189,7 @@ internal static class KeyboardHook
             if (rects[i].Right > union.Right) union.Right = rects[i].Right;
             if (rects[i].Bottom > union.Bottom) union.Bottom = rects[i].Bottom;
         }
-        WindowSnapper.Snap(ModeState.PlacementTargetHwnd, union);
+        WindowSnapper.Snap(ModeState.PlacementTargetHwnd, union, s_config.MaximizeWhenFullScreen);
     }
 
     private static void EnterPlacementMode()
@@ -271,7 +271,7 @@ internal static class KeyboardHook
         int n = ordered.Count;
         int next = ((current + delta) % n + n) % n;
 
-        WindowSnapper.Snap(hwnd, ordered[next].Rect);
+        WindowSnapper.Snap(hwnd, ordered[next].Rect, s_config.MaximizeWhenFullScreen);
     }
 
     private static List<Region> OrderedRegions()
