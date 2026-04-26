@@ -11,7 +11,7 @@
   <Identity
     Name="patrichiel.Fenstr"
     Publisher="CN=BB91E495-04F9-4D73-98C5-0FA5A02E9B97"
-    Version="0.0.2.0" />
+    Version="0.0.3.0" />
 
   <mp:PhoneIdentity PhoneProductId="8ce208c0-6c98-461b-9b8c-e4575df183cc" PhonePublisherId="00000000-0000-0000-0000-000000000000"/>
 
