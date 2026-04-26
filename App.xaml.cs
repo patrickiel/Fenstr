@@ -104,6 +104,9 @@ public partial class App : Application
 
         DragTracker.Start(regions, monitors, _overlays, _gridPreviews, Cfg);
         KeyboardHook.Start(regions, monitors, Cfg, _selectionWindows);
+
+        if (Cfg.AutoUpdateEnabled)
+            UpdateChecker.CheckInBackground(dispatcherQueue);
     }
 
     private void SetupTrayIcon(DispatcherQueue dispatcherQueue)

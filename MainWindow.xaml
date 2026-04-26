@@ -25,6 +25,15 @@
         <ScrollViewer Grid.Row="1">
             <StackPanel Padding="16,0,16,16" Spacing="4">
 
+                <InfoBar x:Name="UpdateInfoBar"
+                         Title="Update available"
+                         IsOpen="False" IsClosable="True" Severity="Informational"
+                         Margin="0,0,0,8">
+                    <InfoBar.ActionButton>
+                        <Button Content="Update now" Click="UpdateNow_Click" />
+                    </InfoBar.ActionButton>
+                </InfoBar>
+
                 <!-- General -->
                 <TextBlock Text="General" Margin="4,0,0,8"
                            Style="{StaticResource BodyStrongTextBlockStyle}" />
@@ -38,6 +47,9 @@
                         <ToggleSwitch x:Name="MaximizeFullScreenToggle"
                                       Header="Maximize when snapped region fills the screen"
                                       Toggled="MaximizeFullScreenToggle_Toggled" />
+                        <ToggleSwitch x:Name="AutoUpdateToggle"
+                                      Header="Check for updates automatically"
+                                      Toggled="AutoUpdateToggle_Toggled" />
                     </StackPanel>
                 </Border>
 

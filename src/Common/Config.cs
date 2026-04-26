@@ -20,7 +20,8 @@ internal record Config(
     bool PlacementHotkeyEnabled = true,
     bool MaximizeDragEnabled = true,
     int MaximizeDragWidthPercent = 50,
-    bool MaximizeWhenFullScreen = true)
+    bool MaximizeWhenFullScreen = true,
+    bool AutoUpdateEnabled = true)
 {
     public const int DefaultDivisions = 2;
 
