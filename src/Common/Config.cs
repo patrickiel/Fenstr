@@ -17,7 +17,9 @@ internal record HotkeyBinding(int VkCode, bool Win = false, bool Ctrl = false, b
 internal record Config(
     List<MonitorConfig> Monitors,
     HotkeyBinding? PlacementHotkey = null,
-    bool PlacementHotkeyEnabled = true)
+    bool PlacementHotkeyEnabled = true,
+    bool MaximizeDragEnabled = true,
+    int MaximizeDragWidthPercent = 50)
 {
     public const int DefaultDivisions = 2;
 

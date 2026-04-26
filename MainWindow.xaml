@@ -36,6 +36,30 @@
                                   Toggled="StartupToggle_Toggled" />
                 </Border>
 
+                <!-- Drag to maximize -->
+                <TextBlock Text="Drag to maximize" Margin="4,16,0,8"
+                           Style="{StaticResource BodyStrongTextBlockStyle}" />
+
+                <Border Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"
+                        BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
+                        BorderThickness="1" CornerRadius="8" Padding="16">
+                    <StackPanel Spacing="12">
+                        <ToggleSwitch x:Name="MaximizeDragToggle"
+                                      Header="Enable drag to maximize"
+                                      Toggled="MaximizeDragToggle_Toggled" />
+
+                        <StackPanel x:Name="MaximizeWidthPanel" Spacing="4">
+                            <TextBlock Text="Drop zone width (% of region)"
+                                       Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
+                            <StackPanel Orientation="Horizontal" Spacing="12">
+                                <Slider x:Name="MaximizeWidthSlider" Minimum="10" Maximum="90"
+                                        Width="260" ValueChanged="MaximizeWidthSlider_ValueChanged" />
+                                <TextBlock x:Name="MaximizeWidthLabel" VerticalAlignment="Center" />
+                            </StackPanel>
+                        </StackPanel>
+                    </StackPanel>
+                </Border>
+
                 <!-- Keyboard placement mode -->
                 <TextBlock Text="Keyboard placement mode" Margin="4,16,0,8"
                            Style="{StaticResource BodyStrongTextBlockStyle}" />

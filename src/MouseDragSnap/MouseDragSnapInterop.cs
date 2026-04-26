@@ -15,11 +15,27 @@ internal static partial class MouseDragSnapInterop
     public const int WH_MOUSE_LL = 14;
     public const int HC_ACTION = 0;
 
+    public const int WM_MOUSEMOVE = 0x0200;
+    public const int WM_LBUTTONDOWN = 0x0201;
+    public const int WM_LBUTTONUP = 0x0202;
     public const int WM_MOUSEWHEEL = 0x020A;
     public const int WM_RBUTTONDOWN = 0x0204;
     public const int WM_RBUTTONUP = 0x0205;
+    public const int WM_NCHITTEST = 0x0084;
     public const int WM_PAINT = 0x000F;
     public const int WM_SETTINGCHANGE = 0x001A;
+
+    public const int HTCLIENT = 1;
+    public const int HTCAPTION = 2;
+    public const uint WM_NCLBUTTONDOWN = 0x00A1;
+    public const uint GA_ROOT = 2;
+    public const uint LLMHF_INJECTED = 0x00000001;
+    public const int SM_CYCAPTION = 4;
+    public const int SM_CYFRAME = 33;
+    public const int SM_CXDRAG = 68;
+    public const int SM_CYDRAG = 69;
+    public const int SM_CXPADDEDBORDER = 92;
+    public const uint SMTO_ABORTIFHUNG = 0x0002;
 
     public const int WS_POPUP = unchecked((int)0x80000000);
 
@@ -213,4 +229,20 @@ internal static partial class MouseDragSnapInterop
 
     [LibraryImport("kernel32.dll", EntryPoint = "GetModuleHandleW", StringMarshalling = StringMarshalling.Utf16)]
     public static partial nint GetModuleHandle(string? lpModuleName);
+
+    [DllImport("user32.dll")]
+    public static extern nint WindowFromPoint(CommonInterop.POINT point);
+
+    [LibraryImport("user32.dll")]
+    public static partial nint GetAncestor(nint hwnd, uint gaFlags);
+
+    [LibraryImport("user32.dll")]
+    public static partial int GetSystemMetrics(int nIndex);
+
+    [LibraryImport("user32.dll", EntryPoint = "PostMessageW")]
+    [return: MarshalAs(UnmanagedType.Bool)]
+    public static partial bool PostMessage(nint hWnd, uint msg, nuint wParam, nint lParam);
+
+    [DllImport("user32.dll", CharSet = CharSet.Auto)]
+    public static extern nint SendMessageTimeout(nint hWnd, uint msg, nuint wParam, nint lParam, uint fuFlags, uint uTimeout, out nint lpdwResult);
 }

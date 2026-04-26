@@ -4,6 +4,34 @@ namespace Fenstr;
 
 internal static class RegionHitTester
 {
+    private const int MaximizeZonePx = 6;
+    private const int MaximizeRegionIndex = -1;
+
+    public static Region? MaximizeHitTest(POINT pt, List<MonitorEntry> monitors, List<Region> regions, int widthPercent)
+    {
+        foreach (var m in monitors)
+        {
+            if (pt.X < m.Bounds.Left || pt.X >= m.Bounds.Right ||
+                pt.Y < m.Bounds.Top  || pt.Y >= m.Bounds.Bottom)
+                continue;
+
+            var wa = m.WorkArea;
+            if (pt.Y < wa.Top || pt.Y >= wa.Top + MaximizeZonePx)
+                return null;
+
+            var first = regions.Find(r => r.MonitorId == m.Id);
+            if (first == null) return null;
+
+            int zoneW = first.Rect.Width * Math.Clamp(widthPercent, 10, 90) / 100;
+            int centerX = wa.Left + wa.Width / 2;
+            if (pt.X >= centerX - zoneW / 2 && pt.X < centerX + (zoneW - zoneW / 2))
+                return new Region(m.Id, MaximizeRegionIndex, wa);
+
+            return null;
+        }
+        return null;
+    }
+
     public static MonitorEntry? FindMonitor(POINT pt, List<MonitorEntry> monitors)
     {
         foreach (var m in monitors)

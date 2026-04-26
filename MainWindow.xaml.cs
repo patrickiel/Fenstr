@@ -57,6 +57,11 @@ public sealed partial class MainWindow : Window
         _loading = true;
         try
         {
+            MaximizeDragToggle.IsOn = cfg.MaximizeDragEnabled;
+            MaximizeWidthSlider.Value = cfg.MaximizeDragWidthPercent;
+            MaximizeWidthLabel.Text = cfg.MaximizeDragWidthPercent + "%";
+            SetMaximizeWidthPanelEnabled(cfg.MaximizeDragEnabled);
+
             PlacementEnabledToggle.IsOn = cfg.PlacementHotkeyEnabled;
             SetHotkeyPanelEnabled(cfg.PlacementHotkeyEnabled);
 
@@ -72,6 +77,42 @@ public sealed partial class MainWindow : Window
         {
             _loading = false;
         }
+    }
+
+    private void MaximizeDragToggle_Toggled(object sender, RoutedEventArgs e)
+    {
+        SetMaximizeWidthPanelEnabled(MaximizeDragToggle.IsOn);
+        PersistMaximizeSettings();
+    }
+
+    private void MaximizeWidthSlider_ValueChanged(object sender, Microsoft.UI.Xaml.Controls.Primitives.RangeBaseValueChangedEventArgs e)
+    {
+        if (MaximizeWidthLabel != null)
+            MaximizeWidthLabel.Text = (int)e.NewValue + "%";
+        PersistMaximizeSettings();
+    }
+
+    private void SetMaximizeWidthPanelEnabled(bool enabled)
+    {
+        MaximizeWidthSlider.IsEnabled = enabled;
+        MaximizeWidthPanel.Opacity = enabled ? 1.0 : 0.4;
+    }
+
+    private void PersistMaximizeSettings()
+    {
+        if (_loading) return;
+        var cfg = ((App)Application.Current).Cfg;
+        if (cfg == null) return;
+
+        var updated = cfg with
+        {
+            MaximizeDragEnabled = MaximizeDragToggle.IsOn,
+            MaximizeDragWidthPercent = (int)MaximizeWidthSlider.Value,
+        };
+        updated.Save();
+
+        ((App)Application.Current).Cfg = updated;
+        DragTracker.UpdateConfig(updated);
     }
 
     private void PlacementEnabledToggle_Toggled(object sender, RoutedEventArgs e)

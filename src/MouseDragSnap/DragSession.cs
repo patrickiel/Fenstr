@@ -13,6 +13,7 @@ internal sealed class DragSession(
     private const int EdgeZonePx = 16;
     private const int MinDivisions = 1;
     private const int MaxDivisions = 10;
+    private const int MaximizeRegionIndex = -1;
     private const int SpanRegionIndex = -2;
     public nint DraggedHwnd;
     public Region? ActiveRegion;
@@ -71,7 +72,12 @@ internal sealed class DragSession(
     public void OnDragEnd()
     {
         if (ActiveRegion != null && DraggedHwnd != 0)
-            WindowSnapper.Snap(DraggedHwnd, ActiveRegion.Rect);
+        {
+            if (ActiveRegion.Index == MaximizeRegionIndex)
+                ShowWindow(DraggedHwnd, SW_MAXIMIZE);
+            else
+                WindowSnapper.Snap(DraggedHwnd, ActiveRegion.Rect);
+        }
         HideActiveOverlay();
         HideAllGridPreviews();
         ActiveRegion = null;
@@ -165,6 +171,13 @@ internal sealed class DragSession(
     {
         if (_lockedTarget != null)
             return _lockedTarget;
+
+        if (!ZoneMode && !_spanActive && config.MaximizeDragEnabled)
+        {
+            var maxHit = RegionHitTester.MaximizeHitTest(pt, monitors, regions, config.MaximizeDragWidthPercent);
+            if (maxHit != null)
+                return maxHit;
+        }
 
         var hit = RegionHitTester.HitTest(pt, ZoneMode, monitors, regions, EdgeZonePx);
 
